@@ -6,6 +6,7 @@ class Context:
     """
     # Place for raw experimental data
     DATA_ROOT_FOLDER = 'data/'
+    TEMPORARY_ROOT_FOLDER = 'tmp/'
     # Place for video recordings
     # Please abide the naming convention: videos are placed under names {0-based index_number}.mp4 in the following
     VISUAL_ROOT_FOLDER = DATA_ROOT_FOLDER + 'recordings/'
@@ -23,7 +24,8 @@ class Context:
     # You will be able to choose the address list when running setup (it will produce a file in TMP)
     # If you have multiple .pcap.gz files then first run mergecap -a in the file directory and export the file as csv
     # Make sure you use absolute timestamps with just the time of the day that is the basis of UET
-    ROUTER_ROOT_FOLDER = DATA_ROOT_FOLDER + '/router'
-    ROUTER_FILE_PATH = ROUTER_ROOT_FOLDER + '/captures.pcap'
+    ROUTER_ROOT_FOLDER = DATA_ROOT_FOLDER + 'router'
+    ROUTER_FILE_PATH = ROUTER_ROOT_FOLDER + 'captures.csv'
 
-    #
+    # Homographies for cartesian coordinate warps per video
+    HOMOGRAPHY_ROOT_FOLDER = TEMPORARY_ROOT_FOLDER + "homographies/"

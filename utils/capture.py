@@ -8,11 +8,18 @@ class Capture:
     A helper class to capture specific points on the floor to map them further into a decart coordinates.
     Of course there is a level of approximation after the warp but when normalized by full area this works quite well.
     """
-    def __init__(self):
+    def __init__(self, window: str, frame: cv2.Mat):
         """
         Initializing detections of mouse clicks
         """
         self.__detections = []
+        cv2.namedWindow(window)
+        cv2.imshow(window, frame)
+        cv2.setMouseCallback(window, self())
+
+    @property
+    def detections(self) -> List[List[int]]:
+        return self.__detections[0]
 
     @staticmethod
     def capture_mouse_clicked(
