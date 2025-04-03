@@ -44,7 +44,8 @@ class VideoWarp:
             self.__selector_function.bottom_right(self.__detections),
             self.__selector_function.bottom_left(self.__detections),
             self.__selector_function.top_right(self.__detections)
-        ])
+        ], dtype=np.float32)
+
         homography = cv2.getPerspectiveTransform(source_coordinates, self.DESTINATION_COORDINATES)
         with open(f"{self.__context.HOMOGRAPHY_ROOT_FOLDER}{self.__file_id}.homography", 'wb') as file:
             pickle.dump(homography, file)

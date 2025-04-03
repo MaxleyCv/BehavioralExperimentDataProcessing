@@ -2,9 +2,10 @@ from routines.constants import Context
 from routines.routine import Routine
 from utils.capture import Capture
 from utils.command_line_interface import CommandInterface
+from video_warps.children import selector_functions
+
 import cv2
 
-from video_warps.selector_function import SelectorFunction
 from video_warps.video_warp import VideoWarp
 
 
@@ -27,15 +28,7 @@ class VideoCalibrationRoutine(Routine):
             self.status = self.status and self.__start_interface_per_video(video_id)
             if self.status:
                 # Now, I know this is very weird but is needed to load module
-                selector_function: SelectorFunction
-                COMMAND = f"from video_warps.children.{video_id} import selector_function"
-                try:
-                    exec(COMMAND)
-                except Exception as e:
-                    print(e)
-                    print(f"Sorry! Function not found for video id {video_id}")
-                    raise e
-
+                selector_function = selector_functions[video_id]
                 # just initialization of this class is enough to compute and save homography
                 VideoWarp(
                     self.__context,
@@ -50,12 +43,12 @@ class VideoCalibrationRoutine(Routine):
     def __start_interface_per_video(self, video_id: int) -> bool:
         """
         A small interactive interface to select the points matching
-        :param video_id:
+        :param video_id: id of the video
         :return:
         """
         interface = CommandInterface(f"Computing homographies for video {video_id}")
         interface.write_instruction(f"Please make sure that you have created {video_id}.py in video_warps/children")
-        interface.write_instruction("Showing on the image is a sample of your video. A - nice frame, D - change.")
+        interface.write_instruction("Showing on the image is a sample of your video. A - next frame, D - select.")
 
         video = cv2.VideoCapture(self.__video_list[video_id])
         _, frame = video.read()
@@ -72,10 +65,10 @@ class VideoCalibrationRoutine(Routine):
             elif key == ord('d') or key == ord('D'):
                 interface.write_instruction("Now we can continue to select the clicks.")
                 break
-
+        interface.write_instruction(f"Your manifest for this video is:\n {selector_functions[video_id].MANIFEST}")
         interface.write_instruction("Now capture your points. Never click!")
         capture = Capture(window_name, frame)
-        cv2.imshow(window_name, capture)
+        cv2.imshow(window_name, frame)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 

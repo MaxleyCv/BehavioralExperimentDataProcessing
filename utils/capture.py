@@ -3,12 +3,15 @@ from typing import List, Any
 import cv2
 from functools import partial
 
+import numpy as np
+
+
 class Capture:
     """
     A helper class to capture specific points on the floor to map them further into a decart coordinates.
     Of course there is a level of approximation after the warp but when normalized by full area this works quite well.
     """
-    def __init__(self, window: str, frame: cv2.Mat):
+    def __init__(self, window: str, frame: np.array):
         """
         Initializing detections of mouse clicks
         """

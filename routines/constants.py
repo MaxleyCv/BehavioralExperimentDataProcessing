@@ -29,3 +29,9 @@ class Context:
 
     # Homographies for cartesian coordinate warps per video
     HOMOGRAPHY_ROOT_FOLDER = TEMPORARY_ROOT_FOLDER + "homographies/"
+
+    # Poses will need to be yielded at some point
+    POSE_ROOT_FOLDER = TEMPORARY_ROOT_FOLDER + "poses/"
+
+    # Number of used videos
+    NUMBER_OF_VIDEOS = 4
