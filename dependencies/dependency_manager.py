@@ -12,7 +12,7 @@ class DependencyManager:
             current_routine: Routine
     ):
         routine_additional_queue = Queue()
-        self.dependency_list = [dependency(routine_queue=routine_additional_queue) for dependency in dependency_list]
+        self.dependency_list = [dependency_cls(routine_queue=routine_additional_queue) for dependency_cls in dependency_list]
         self.__current_routine = current_routine
         self.__routine_queue = routine_additional_queue
 

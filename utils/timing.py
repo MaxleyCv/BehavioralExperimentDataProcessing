@@ -5,6 +5,8 @@ class UET:
     """
     def __init__(self, timestamp: str):
         # Just to save the main culprit.
+        if timestamp == "null":
+            timestamp = "0:0:0.0"
         self.__timestamp = timestamp
         self.__needs_shift = False
         self.__uet = self._split_hh_mm_ss_us(timestamp)

@@ -6,10 +6,10 @@ from routines.constants import Context
 from routines.error_routine import ErrorRoutine
 
 
-class VideoPresentDependency(Dependency):
-    def __init__(self, number_of_videos: int, routine_queue: Queue):
+class VideosPresentDependency(Dependency):
+    def __init__(self, routine_queue: Queue):
         self.__context = Context()
-        self.number_of_videos = number_of_videos
+        self.number_of_videos = self.__context.NUMBER_OF_VIDEOS
         super().__init__(routine_queue, [(self.all_videos_present_condition, ErrorRoutine())])
 
     def resolve(self, *args, **kwargs):

@@ -1,33 +1,49 @@
 import pickle
+from typing import Optional
 
-import numpy as np
 import torch
 from ultralytics import YOLO
 
+from dependencies.dependency_manager import DependencyManager
+from dependencies.videos_present_dependency import VideosPresentDependency
 from routines.constants import Context
+from routines.dependency_reliant_routine import DependencyReliantRoutineMixin, dependency_reliant_method
 from routines.routine import Routine
 from utils.command_line_interface import CommandInterface
 
 
-class PoseGenerationRoutine(Routine):
+class PoseGenerationRoutine(Routine, DependencyReliantRoutineMixin):
     """
     Using Yolov11-pose provide skeleton and bounding box representations to each frame of the videos.
     """
-    def __init__(self, number_of_videos: int):
+    def __init__(self):
         context = Context()
-        self.__number_of_videos = number_of_videos
+
+        # DEPENDENCIES
+        super(DependencyReliantRoutineMixin).__init__(
+            DependencyManager(
+                dependency_list=[
+                    VideosPresentDependency
+                ],
+                current_routine=self
+            )
+        )
+
+        self.__number_of_videos = context.NUMBER_OF_VIDEOS
         self.__context = context
         self.__video_paths = [
             context.VIDEO_ROOT_FOLDER + f"{video_id}.mp4"
             for video_id
-            in range(number_of_videos)
+            in range(self.__number_of_videos)
         ]
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = YOLO('yolo11x-pose.pt')
         # well.... no graphic card and you're stuck here forever
         model.to(device)
         self.__model = model
+        self.__interface: Optional[CommandInterface] = None
 
+    @dependency_reliant_method
     def execute(self) -> bool:
         self.__interface = CommandInterface("Starting pose generation routine!")
         status = True
@@ -57,3 +73,5 @@ class PoseGenerationRoutine(Routine):
 
         with open(f'{self.__context.POSE_ROOT_FOLDER}vid-{video_id}.poses', 'wb') as f:
             pickle.dump(saved_poses, f)
+
+        return True
