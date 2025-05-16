@@ -25,21 +25,33 @@ class CombineVisualFeaturesRoutine(Routine):
                 self.__context.VISUAL_EMBEDDINGS_COMBINED_PATH + key + ".emb", 'wb'
             ) as f:
                 pickle.dump(feature_vectors, f)
+        self.__save_uet_grid(uet_grid)
         return True
 
     def __produce_uet_grid(self) -> List[UET]:
         minimal_timestamp = min(
             map(
-                min, [self.__read_uet_files(video_id) for video_id in range(self.__context.NUMBER_OF_VIDEOS)]
+                min, [
+                    self.__read_uet_files(video_id)[self.__context.TIMESTAMP_CUTOFF_FRAMES[video_id]:]
+                    for video_id in range(self.__context.NUMBER_OF_VIDEOS)
+                ]
             )
         )
         maximal_timestamp = max(
             map(
-                max, [self.__read_uet_files(video_id) for video_id in range(self.__context.NUMBER_OF_VIDEOS)]
+                max, [
+                    self.__read_uet_files(video_id)[self.__context.TIMESTAMP_CUTOFF_FRAMES[video_id]:]
+                    for video_id in range(self.__context.NUMBER_OF_VIDEOS)
+                ]
             )
         )
         uet_grid = (
-            list(range(minimal_timestamp, maximal_timestamp + 1, self.__context.TIME_STEP_INTERVAL_USECONDS))
+            list(
+                map(
+                    UET.from_integer,
+                    range(minimal_timestamp, maximal_timestamp + 1, self.__context.TIME_STEP_INTERVAL_USECONDS)
+                )
+            )
         )
         return uet_grid
 

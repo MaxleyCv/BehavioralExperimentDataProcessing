@@ -6,10 +6,13 @@ class UET:
     def __init__(self, timestamp: str):
         # Just to save the main culprit.
         if timestamp == "null":
-            timestamp = "0:0:0.0"
+            self.__uet = 0
         self.__timestamp = timestamp
         self.__needs_shift = False
-        self.__uet = self._split_hh_mm_ss_us(timestamp)
+        try:
+            self.__uet = self._split_hh_mm_ss_us(timestamp)
+        except ValueError as e:
+            self.__uet = 0
 
     @staticmethod
     def from_integer(uet: int):
@@ -26,6 +29,9 @@ class UET:
         h = uet // 60
         return UET(f"{h}:{m}:{s}.{us}")
 
+    def __index__(self):
+        return self.__uet
+
     def __str__(self):
         return str(self.__uet)
 
@@ -41,6 +47,60 @@ class UET:
         else:
             raise ValueError("Sorry. Not the valid UET to compare.")
 
+    def __lt__(self, other) -> bool:
+        if isinstance(other, UET):
+            return self() < other()
+        elif isinstance(other, int):
+            other = UET.from_integer(other)
+            return self() < other()
+        else:
+            raise ValueError()
+
+    def __gt__(self, other) -> bool:
+        if isinstance(other, UET):
+            return self() > other()
+        elif isinstance(other, int):
+            other = UET.from_integer(other)
+            return self() > other()
+        else:
+            raise ValueError()
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, UET):
+            return self() == other()
+        elif isinstance(other, int):
+            other = UET.from_integer(other)
+            return self() == other()
+        else:
+            raise ValueError()
+
+    def __le__(self, other) -> bool:
+        if isinstance(other, UET):
+            return self() <= other()
+        elif isinstance(other, int):
+            other = UET.from_integer(other)
+            return self() <= other()
+        else:
+            raise ValueError()
+
+    def __ge__(self, other) -> bool:
+        if isinstance(other, UET):
+            return self() >= other()
+        elif isinstance(other, int):
+            other = UET.from_integer(other)
+            return self() >= other()
+        else:
+            raise ValueError()
+
+    def __ne__(self, other) -> bool:
+        if isinstance(other, UET):
+            return self() != other()
+        elif isinstance(other, int):
+            other = UET.from_integer(other)
+            return self() != other()
+        else:
+            raise ValueError()
+
     def __add__(self, other):
         if isinstance(other, int):
             return UET.from_integer(self.__uet + other)
@@ -48,6 +108,9 @@ class UET:
             return UET.from_integer(self.__uet + other())
         else:
             raise ValueError("To add UETs they should be ints or UETs. Only right side adds count for ints.")
+
+    def __int__(self):
+        return self.__uet
 
     def __sub__(self, other) -> int:
         """
@@ -70,7 +133,11 @@ class UET:
         return  None
 
     def _split_hh_mm_ss_us(self, stamp) -> int:
-        main_part, microseconds = stamp.split('.')
+        if "." in stamp:
+            main_part, microseconds = stamp.split('.')
+        else:
+            main_part = stamp
+            microseconds = ""
         h, m, s, us = 0, 0, 0, 0
         if len(microseconds) == 3:
             # This kind of assignment comes in TCP traffic analysis

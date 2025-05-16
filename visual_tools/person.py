@@ -42,7 +42,6 @@ class Person:
 
         self.__PART_KEY_MAPPING = part_key_mapping
 
-
     def get_body_part(self, body_part: str, raise_alert: bool = True):
         default_part = self.skeleton[self.__PART_KEY_MAPPING[body_part]]
 

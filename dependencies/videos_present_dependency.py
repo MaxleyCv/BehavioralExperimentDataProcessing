@@ -14,7 +14,7 @@ class VideosPresentDependency(Dependency):
 
     def resolve(self, *args, **kwargs):
         raise NotImplementedError(
-            "This video can only be resolved by adding data!"
+            "This issue can only be resolved by adding data! Check constants/context.py to better understand"
         )
 
     def all_videos_present_condition(self) -> bool:

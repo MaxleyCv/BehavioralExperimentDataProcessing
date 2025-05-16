@@ -1,3 +1,5 @@
+import copy
+
 import pandas as pd
 
 from network_tools.tools import leave_only, search_minimal
@@ -23,7 +25,7 @@ class NetworkStatistics:
     def read_incoming_traffic_from_host_uet(self, uet_space):
 
         host: str = self.__host
-        dataframe: pd.DataFrame = self.__dataframe
+        dataframe: pd.DataFrame = copy.deepcopy(self.__dataframe)
 
         df_given_dest = dataframe[dataframe.Destination.isin([host])]
 
@@ -47,9 +49,10 @@ class NetworkStatistics:
     def read_outcoming_traffic_from_host_uet(self, uet_space):
 
         host: str = self.__host
-        dataframe: pd.DataFrame = self.__dataframe
+        dataframe: pd.DataFrame = copy.deepcopy(self.__dataframe)
 
         df_given_dest = dataframe[dataframe.Source.isin([host])]
+        print(df_given_dest.shape)
         df_filtered = leave_only(["Time", "Source", "Length"], df_given_dest)
         times = df_filtered["Time"]
         times_usec = list(map(UET, times))
@@ -57,6 +60,11 @@ class NetworkStatistics:
         new_times["CumulativeLength"] = new_times["length"].cumsum()
         DIFF_USEC = self.__context.NETWORK_OBSERVATION_WINDOW_SECONDS * 10 ** 6
         T = new_times.reset_index()
+
+        if T.shape[0] == 0:
+            print(f"Shut out host {host}")
+            return uet_space, [0 for _ in range(len(uet_space))]
+
         timestamps_new, lengths = [], []
         for timestamp in uet_space:
             frame_left_id = search_minimal(T.shape[0] - 1, timestamp, T, DIFF_USEC)

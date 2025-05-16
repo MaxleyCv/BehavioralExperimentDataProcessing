@@ -1,4 +1,8 @@
-def leave_only(column_list, data):
+import copy
+
+
+def leave_only(column_list, data_initial):
+    data = copy.deepcopy(data_initial)
     original_column_list = data.columns
     extra = list(set(original_column_list) - set(column_list))
     data = data.drop(columns=extra)

@@ -1,10 +1,12 @@
 import csv
 import os
 import pickle
+from collections import defaultdict
 from typing import List
 
 from routines.constants import Context
 from routines.routine import Routine
+from utils.command_line_interface import CommandInterface
 from utils.timing import UET
 
 
@@ -31,11 +33,23 @@ class ComposeTimestampsRoutine(Routine):
         with open(strings_file_path, "r") as strings_file:
             reader = csv.reader(strings_file)
             result = []
+            stamps_seen = defaultdict(lambda : -1)
+            all_timestamps = []
+
             for row in reader:
-                result.append(UET(row[0]))
+                all_timestamps.append(row[0])
+
+            for timestamp in all_timestamps:
+                if timestamp != 'null':
+                    stamps_seen[timestamp] += 1
+                padding = 10 ** 6 // all_timestamps.count(timestamp)
+                # a little bit inefficient memory-wise but ok in terms of readability
+                result.append(UET(timestamp) + padding * stamps_seen[timestamp])
+
         return result
 
     def execute(self) -> bool:
+        cmd = CommandInterface("Starting composing your timestamps!")
         if self.__prepared_timestamps_present:
             return True
         strings_folder = self.__context.EXTRA_TIMESTAMPS_FOLDER

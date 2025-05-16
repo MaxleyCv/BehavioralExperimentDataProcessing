@@ -5,7 +5,7 @@ from timestamps_from_videos.timestamp_reader import VideoTimestampReader
 
 
 class FirstVideoTimestampReader(VideoTimestampReader):
-    def get_timestamp_image(self, frame: np.array | cv2.Mat) -> np.ndarray | cv2.Mat:
+    def get_timestamp_image(self, frame: np.array) -> np.ndarray:
         # doing some convolution here
         kernel = np.array(
             [

@@ -27,6 +27,6 @@ class VideoAssigner:
             cv2.circle(frame, list(map(int, point)), 2, (255, 255, 0), 2)
         cv2.imshow("frame", frame)
         key = cv2.waitKey(0)
-        self.assignment_data[str(key)].append(trackable_instance)
+        self.assignment_data[chr(key)].append(trackable_instance)
         cv2.destroyAllWindows()
         return None

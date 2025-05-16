@@ -102,7 +102,7 @@ class PersonRepresentation:
             for i in range(len(self.representations)):
                 if embedding_indexes[i] is not None:
                     if not self.__restricted(embedding_indexes[i], i):
-                        to_float = lambda x: None if x == '' else float(x)
+                        to_float = lambda x: None if x == '' or x is None else float(x)
                         embeddings.append(list(map(to_float, self.representations[i][embedding_indexes[i]])))
                         participating_cameras.add(i)
 
@@ -123,6 +123,10 @@ class PersonRepresentation:
                 if embeddings[self.__body_part_mapping['left_arm_ratio']][i] is not None:
                     if distance_to_1(embeddings[self.__body_part_mapping['left_arm_ratio']][i]) < current_minimum:
                         selected_aLE = embeddings[self.__body_part_mapping['ang_left_arm']][i]
+                        current_minimum = distance_to_1(embeddings[self.__body_part_mapping['left_arm_ratio']][i])
+
+            if selected_aLE is None:
+                selected_aLE = 0
 
             feature_vectors[-1].append(selected_aLE)
             #Angle right arm-elb
@@ -132,16 +136,22 @@ class PersonRepresentation:
                 if embeddings[self.__body_part_mapping['right_arm_ratio']][i] is not None:
                     if distance_to_1(embeddings[self.__body_part_mapping['right_arm_ratio']][i]) < current_minimum:
                         selected_aRE = embeddings[self.__body_part_mapping['ang_right_arm']][i]
+                        current_minimum = distance_to_1(embeddings[self.__body_part_mapping['right_arm_ratio']][i])
+
+            if selected_aRE is None:
+                selected_aRE = 0
 
             feature_vectors[-1].append(selected_aRE)
             #]Angle eye-shoulder
-            angSE = min(abs(math.pi / 2 - emb) if emb is not None else 100 for emb in embeddings[self.__body_part_mapping['ang_eye_shoulder']])
+            angSE = min(abs(math.pi / 2 - emb) if emb is not None else math.pi / 2  for emb in embeddings[
+                self.__body_part_mapping['ang_eye_shoulder']])
             feature_vectors[-1].append(angSE)
             #Angle neck-back
-            angNB = min(abs(math.pi / 2 - emb) if emb is not None else -100 for emb in embeddings[self.__body_part_mapping['ang_neck_back']])
+            angNB = min(abs(math.pi / 2 - emb) if emb is not None else math.pi / 2 for emb in embeddings[
+                self.__body_part_mapping['ang_neck_back']])
             feature_vectors[-1].append(angNB)
             #bbwh
-            bbwh = min(emb if emb is not None else -100 for emb in embeddings[self.__body_part_mapping['bbwh']])
+            bbwh = min(emb if emb is not None else 2 for emb in embeddings[self.__body_part_mapping['bbwh']])
             feature_vectors[-1].append(bbwh)
             #Distance covered in last 10 s
             covered_areas = []
@@ -152,14 +162,21 @@ class PersonRepresentation:
                 if uet_id is None:
                     uet_id = 0
                 for i in range(uet_id, embedding_indexes[representation_id] + 1):
-                    X.append(float(self.representations[representation_id][i][0]))
-                    Y.append(float(self.representations[representation_id][i][1]))
+                    try:
+                        X.append(float(self.representations[representation_id][i][0]))
+                        Y.append(float(self.representations[representation_id][i][1]))
+                    except Exception as e:
+                        continue
 
-                covered_area = (max(X) - min(X)) * (max(Y) - min(Y))
-                covered_areas.append(covered_area)
+                if len(X) != 0 and len(Y) != 0:
+                    covered_area = (max(X) - min(X)) * (max(Y) - min(Y))
+                    covered_areas.append(covered_area)
 
-            avg = lambda x: sum(x) / len(x)
-            movEMB = avg(covered_areas) / (720 * 1280)
+            try:
+                avg = lambda x: sum(x) / len(x)
+                movEMB = avg(covered_areas) / (720 * 1280)
+            except ZeroDivisionError:
+                movEMB = 0
             feature_vectors[-1].append(movEMB)
         return feature_vectors
 

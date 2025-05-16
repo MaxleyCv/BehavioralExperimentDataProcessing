@@ -32,9 +32,9 @@ class ReadTimestampsPerVideo(Routine):
             command_interface.write_instruction(f"TIMESTAMPS FOR VIDEO {video_index}")
             reader = timestamp_readers[video_index]
             timestamp_strings = []
-            for frame_path in os.listdir(self.__decomposed_video_paths[video_index]):
+            for frame_id in range(len(os.listdir(self.__decomposed_video_paths[video_index]))):
                 timestamp_string = reader.produce_timestamp(
-                    cv2.imread(frame_path),
+                    cv2.imread(self.__context.VIDEO_DECOMPOSITION_ROOT_FOLDER + f"{video_index}/" + f"{frame_id}.png"),
                 )
                 timestamp_strings.append([timestamp_string])
             target_file_path = self.__context.EXTRA_TIMESTAMPS_FOLDER + f"{video_index}.csv"
@@ -43,7 +43,7 @@ class ReadTimestampsPerVideo(Routine):
                 writer.writerows(timestamp_strings)
 
             command_interface.write_instruction("THESE ARE PROBLEMATIC TIMESTAMPS! FIX MANUALLY!")
-            uets = np.array(list(map(lambda ts: UET, timestamp_strings)))
+            uets = np.array(list(map(lambda ts: UET(ts[0])(), timestamp_strings)))
             uet_deltas = uets[1:] - uets[:-1]
 
             bad_indexes = [index for index in range(len(uet_deltas)) if uet_deltas[index] < 0]

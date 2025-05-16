@@ -1,6 +1,8 @@
 import copy
 import os
 import pickle
+import random
+from collections import deque
 from typing import Optional, List, Dict
 
 import numpy as np
@@ -23,7 +25,7 @@ class TrackableAssignmentRoutine(Routine, DependencyReliantRoutineMixin):
     Some identities remain unassigned (for example, )
     """
     def __init__(self):
-        super(DependencyReliantRoutineMixin).__init__(
+        super().__init__(
             dependency_manager=DependencyManager(
                 dependency_list=[],
                 current_routine=self
@@ -31,7 +33,7 @@ class TrackableAssignmentRoutine(Routine, DependencyReliantRoutineMixin):
         )
         self.__context = Context()
         self.__pose_identity_paths = [
-            self.__context.POSE_ROOT_FOLDER + f"{i}/"
+            self.__context.POSE_ROOT_FOLDER + f"vid-{i}.poses"
             for i in range(self.__context.NUMBER_OF_VIDEOS)
         ]
         self.__decomposed_video_paths = [
@@ -74,8 +76,13 @@ class TrackableAssignmentRoutine(Routine, DependencyReliantRoutineMixin):
             trackables = trackable_dict[key]
             feature_vectors = [t.feature_vectors for t in trackables]
             selected_features = []
+            if len(feature_vectors) == 0:
+                print(key)
+                print(trackable_dict)
             for time_row in range(len(feature_vectors[0])):
-                potential_embeddings = [feature_vectors[instance_id][time_row] for instance_id in range(len(feature_vectors))]
+                potential_embeddings = [
+                    feature_vectors[instance_id][time_row] for instance_id in range(len(feature_vectors))
+                ]
                 number_of_nones = lambda x: sum(1 if p is None else 0 for p in x)
                 potential_embeddings.sort(key=number_of_nones)
                 row = potential_embeddings[0]
@@ -143,9 +150,13 @@ class TrackableAssignmentRoutine(Routine, DependencyReliantRoutineMixin):
     def __produce_primary_trackables(self, transformation: np.array, pose_information: np.array) -> List[Trackable]:
         iteration = -1
 
+        extra_indexes = deque()
+        for i in range(1000, 1500):
+            extra_indexes.append(i)
+
         trackables = []
 
-        for skeletons, boxes, ids in pose_information:
+        for boxes, skeletons, ids in pose_information:
             iteration += 1
             indexes_not_assigned = set(i for i in range(len(boxes)))
             trackables_not_assigned = set(i for i in range(len(trackables)))
@@ -163,10 +174,13 @@ class TrackableAssignmentRoutine(Routine, DependencyReliantRoutineMixin):
             if len(indexes_not_assigned):
                 for idx in copy.copy(indexes_not_assigned):
                     for j in range(len(trackables)):
-                        if trackables[j].index == int(ids[idx]):
-                            trackables[j].feed(boxes[idx], skeletons[idx])
-                            trackables_not_assigned.remove(j)
-                            indexes_not_assigned.remove(idx)
+                        try:
+                            if trackables[j].index == int(ids[idx]):
+                                trackables[j].feed(boxes[idx], skeletons[idx])
+                                trackables_not_assigned.remove(j)
+                                indexes_not_assigned.remove(idx)
+                        except IndexError:
+                            ids.append(extra_indexes.popleft())
 
                 if len(indexes_not_assigned):
                     # Add new trackables

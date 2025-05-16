@@ -35,8 +35,8 @@ class CreateNetworkFeaturesRoutine(Routine):
                 network_stat_dataframe=network_statistics_dataframe
             )
 
-            traffic_in = network_stats.read_outcoming_traffic_from_host_uet(uet_space)
-            traffic_out = network_stats.read_outcoming_traffic_from_host_uet(uet_space)
+            _, traffic_in = network_stats.read_incoming_traffic_from_host_uet(uet_space)
+            _, traffic_out = network_stats.read_outcoming_traffic_from_host_uet(uet_space)
             tcp_in = list(
                 map(
                     connections.num_inc_connections_at_time_per_host,

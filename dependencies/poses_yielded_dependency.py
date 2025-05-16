@@ -11,7 +11,7 @@ class PosesYieldedDependency(Dependency):
         context = Context()
         self.__context = context
         super().__init__(routine_queue, [
-            (self.poses_yielded_condition, PoseGenerationRoutine(self.__context.NUMBER_OF_VIDEOS))
+            (self.poses_yielded_condition, PoseGenerationRoutine())
         ])
 
     def poses_yielded_condition(self):

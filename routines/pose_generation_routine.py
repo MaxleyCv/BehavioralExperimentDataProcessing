@@ -20,7 +20,7 @@ class PoseGenerationRoutine(Routine, DependencyReliantRoutineMixin):
         context = Context()
 
         # DEPENDENCIES
-        super(DependencyReliantRoutineMixin).__init__(
+        super().__init__(
             DependencyManager(
                 dependency_list=[
                     VideosPresentDependency
